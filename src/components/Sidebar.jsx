@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown, BookOpen } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 
-function Sidebar({ setSlug }) {
+function Sidebar({ closeSidebar }) {
+
+   const navigate = useNavigate();
+   const { slug } = useParams();
 
    const categories = [
       "Java Basics",
@@ -12,7 +16,6 @@ function Sidebar({ setSlug }) {
 
    const [open, setOpen] = useState(null);
    const [topics, setTopics] = useState([]);
-   const [activeTopic, setActiveTopic] = useState(null);
 
    const loadTopics = (category) => {
 
@@ -23,71 +26,98 @@ function Sidebar({ setSlug }) {
 
       setOpen(category);
 
-      fetch(`http://localhost:9000/api/topics/category/${category}`)
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/topics/category/${category}`)
          .then(res => res.json())
          .then(data => setTopics(data));
    };
 
-   const handleTopicClick = (topic) => {
-      setSlug(topic.slug);
-      setActiveTopic(topic._id);
-   };
+   useEffect(() => {
+
+      if (!slug) return;
+
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/topics/${slug}`)
+         .then(res => res.json())
+         .then(data => {
+
+            if (data?.category) {
+
+               setOpen(data.category);
+
+               fetch(`${import.meta.env.VITE_BACKEND_URL}/api/topics/category/${data.category}`)
+                  .then(res => res.json())
+                  .then(data => setTopics(data));
+
+            }
+
+         });
+
+   }, [slug]);
 
    return (
 
-      <aside className="w-72 h-screen bg-slate-50 border-r flex flex-col justify-center">
-          
-         <div className="space-y-4 px-6">
+      <div className="w-64 lg:w-72 flex-shrink-0">
 
-            
+         {/* Logo (desktop only) */}
+         <div className="hidden lg:flex h-32 sm:h-36 m-3 sm:m-5 rounded-xl items-center justify-center bg-amber-200 border-b">
+
+            <img
+               src="/image.png"
+               alt="logo"
+               className="h-24 sm:h-28 lg:h-32 w-auto rounded-xl"
+            />
+
+         </div>
+
+         {/* Sidebar Content */}
+
+         <div className="bg-gray-50 border-r border-gray-300 h-full overflow-y-auto">
+
+            <div className="px-4 sm:px-6 py-3 text-base sm:text-lg text-blue-500 bg-gray-200 border-b font-bold">
+               Welcome to Learn Stack
+            </div>
 
             {categories.map(cat => (
 
-               <div key={cat}>
+               <div key={cat} className="border-b">
 
-                  <button
+                  <div
                      onClick={() => loadTopics(cat)}
-                     className="flex items-center justify-between w-full px-4 text-sm font-semibold rounded-lg hover:bg-white hover:shadow transition"
+                     className="flex items-center justify-between px-4 sm:px-6 py-3 cursor-pointer hover:bg-gray-200 transition"
                   >
-                     <div className="flex items-center gap-2">
 
-                        <BookOpen size={16} className="text-indigo-500" />
+                     <div className="flex items-center gap-2 sm:gap-3">
+                        <BookOpen size={18} className="text-indigo-500" />
 
-                        {cat}
-
+                        <span className="text-gray-800 font-medium text-sm sm:text-base">
+                           {cat}
+                        </span>
                      </div>
 
-                     <ChevronDown
-                        size={16}
-                        className={`transition-transform ${open === cat ? "rotate-180 text-indigo-600" : ""
-                           }`}
-                     />
+                     <ChevronDown size={18} />
 
-                  </button>
+                  </div>
 
-                  {open === cat && (
+                  {open === cat &&
+                      
+                     topics.map(topic => (
 
-                     <div className="mt-2 ml-6 space-y-1">
+                        <div
+                           key={topic._id}
+                           onClick={() => {
+                              navigate(`/java/${topic.slug}`);
+                              if (closeSidebar) closeSidebar();
+                           }}
+                           className={`pl-10 sm:pl-12 pr-4 sm:pr-6 py-1 text-sm cursor-pointer
+                                 ${slug === topic.slug
+                                 ? "bg-indigo-100 text-indigo-700 font-semibold border-l-4 border-indigo-500"
+                                 : "text-gray-700 hover:bg-gray-200"
+                              }`}
+                        >
+                           {topic.title}
+                        </div>
 
-                        {topics.map(topic => (
-
-                           <div
-                              key={topic._id}
-                              onClick={() => handleTopicClick(topic)}
-                              className={`px-3 py-2 text-sm rounded-md cursor-pointer transition
-                    ${activeTopic === topic._id
-                                    ? "bg-indigo-100 text-indigo-700 font-medium"
-                                    : "text-gray-600 hover:bg-indigo-50 hover:text-indigo-600"
-                                 }`}
-                           >
-                              {topic.title}
-                           </div>
-
-                        ))}
-
-                     </div>
-
-                  )}
+                     ))
+                  }
 
                </div>
 
@@ -95,75 +125,22 @@ function Sidebar({ setSlug }) {
 
          </div>
 
-      </aside>
-   );
+      </div>
+
+   )
+
 }
 
 export default Sidebar;
 
 
-// import { useState } from "react";
 
-// function Sidebar({ setSlug }) {
 
-//    const categories = [
-//       "Java Basics",
-//       "OOP & Interfaces",
-//       "Collections",
-//       "Exception Handling"
-//    ];
 
-//    const [open, setOpen] = useState(null);
-//    const [topics, setTopics] = useState([]);
 
-//    const loadTopics = (category) => {
+ 
 
-//       if (open === category) {
-//          setOpen(null);
-//          return;
-//       }
 
-//       setOpen(category);
 
-//       fetch(`http://localhost:9000/api/topics/category/${category}`)
-//          .then(res => res.json())
-//          .then(data => setTopics(data));
-//    };
 
-//    return (
-
-//       <div style={{ width: "250px" }}>
-
-//          {categories.map(cat => (
-//             <div key={cat}>
-
-//                <div
-//                   onClick={() => loadTopics(cat)}
-//                   style={{ padding: "10px", cursor: "pointer" }}
-//                >
-//                   {cat}
-//                </div>
-
-//                {open === cat &&
-
-//                   topics.map(topic => (
-//                      <div
-//                         key={topic._id}
-//                         onClick={() => setSlug(topic.slug)}
-//                         style={{ paddingLeft: "20px" }}
-//                      >
-//                         {topic.title}
-//                      </div>
-//                   ))
-
-//                }
-
-//             </div>
-//          ))}
-
-//       </div>
-
-//    )
-// }
-
-// export default Sidebar;
+ 
