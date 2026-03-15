@@ -23,32 +23,82 @@ function Navbar() {
       const value = e.target.value;
       setQuery(value);
 
-      if (value.trim() === "") {
+      const search = value.trim().toLowerCase();
+
+      if (!search) {
          setResults([]);
          return;
       }
 
-      const filtered = topics.filter(topic =>
-         topic.title.toLowerCase().includes(value.toLowerCase())
-      );
+      let matches = [];
 
-      setResults(filtered.slice(0, 5));
+      topics.forEach(topic => {
+
+         const title = topic.title?.toLowerCase() || "";
+         const slug = topic.slug?.toLowerCase() || "";
+         const content = topic.content?.toLowerCase() || "";
+
+         // title match
+         if (title.includes(search)) {
+            matches.push({ ...topic, section: null });
+            return;
+         }
+
+         // slug match
+         if (slug.includes(search)) {
+            matches.push({ ...topic, section: null });
+            return;
+         }
+
+         // section id match from markdown
+         const regex = /{#([a-z0-9\-]+)}/g;
+         let match;
+
+         while ((match = regex.exec(topic.content)) !== null) {
+
+            const sectionId = match[1];
+
+            if (sectionId.includes(search.replace(/\s+/g, "-"))) {
+
+               matches.push({
+                  ...topic,
+                  section: sectionId
+               });
+
+               break;
+            }
+         }
+
+         // fallback content search
+         if (content.includes(search) && matches.length < 5) {
+            matches.push({ ...topic, section: null });
+         }
+
+      });
+
+      setResults(matches.slice(0, 5));
 
    };
 
-   const openTopic = (slug) => {
+
+   const openTopic = (topic) => {
 
       setQuery("");
       setResults([]);
 
-      navigate(`/java/${slug}`);
+      const url = topic.section
+         ? `/java/${topic.slug}#${topic.section}`
+         : `/java/${topic.slug}`;
+
+      navigate(url);
 
    };
+
 
    const handleEnter = (e) => {
 
       if (e.key === "Enter" && results.length > 0) {
-         openTopic(results[0].slug);
+         openTopic(results[0]);
       }
 
    };
@@ -93,16 +143,26 @@ function Navbar() {
 
             {results.length > 0 && (
 
-               <div className="absolute top-12 w-full bg-white border rounded-lg shadow-md overflow-hidden">
+               <div className="absolute top-12 w-full bg-white border rounded-lg shadow-md overflow-hidden max-h-64 overflow-y-auto">
 
-                  {results.map(topic => (
+                  {results.map((topic, i) => (
 
                      <div
-                        key={topic._id}
-                        onClick={() => openTopic(topic.slug)}
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                        key={i}
+                        onClick={() => openTopic(topic)}
+                        className="px-4 py-[8px] hover:bg-gray-100 cursor-pointer text-sm flex flex-col"
                      >
-                        {topic.title}
+
+                        <span className="font-medium text-gray-800">
+                           {topic.title}
+                        </span>
+
+                        {topic.section && (
+                           <span className="text-xs text-gray-500">
+                              {topic.section.replace(/-/g, " ")}
+                           </span>
+                        )}
+
                      </div>
 
                   ))}
@@ -120,6 +180,3 @@ function Navbar() {
 }
 
 export default Navbar;
-
-
- 
