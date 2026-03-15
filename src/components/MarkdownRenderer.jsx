@@ -1,13 +1,92 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useState } from "react";
 
 import ImageSlider from "./ImageSlider";
+import CodeBlock from "./CodeBlock";
 
 function MarkdownRenderer({ content }) {
+
+   const [copiedCode, setCopiedCode] = useState("");
+   const [outputs, setOutputs] = useState({});
+   const [editedCodes, setEditedCodes] = useState({});
+   const [hiddenOutputs, setHiddenOutputs] = useState({});
+
+   const handleCopy = (code) => {
+
+      navigator.clipboard.writeText(code);
+
+      setCopiedCode(code);
+
+      setTimeout(() => {
+         setCopiedCode("");
+      }, 2000);
+
+   };
+
+   const runCode = async (code, id) => {
+
+      // edited code save
+      setEditedCodes(prev => ({
+         ...prev,
+         [id]: code
+      }));
+
+      // show output
+      setHiddenOutputs(prev => ({
+         ...prev,
+         [id]: false
+      }));
+
+      setOutputs(prev => ({
+         ...prev,
+         [id]: "Running..."
+      }));
+
+      try {
+
+         const res = await fetch("http://localhost:9000/api/run", {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ code })
+         });
+
+         const data = await res.json();
+
+         setOutputs(prev => ({
+            ...prev,
+            [id]: data.output || data.stderr || data.compile_output || "No Output"
+         }));
+
+      } catch {
+
+         setOutputs(prev => ({
+            ...prev,
+            [id]: "Error running code"
+         }));
+
+      }
+
+   };
+
+   // OutputBox close hone par code reset
+   const handleHideOutput = (id) => {
+
+      setHiddenOutputs(prev => ({
+         ...prev,
+         [id]: true
+      }));
+
+      setEditedCodes(prev => {
+         const newCodes = { ...prev };
+         delete newCodes[id];
+         return newCodes;
+      });
+
+   };
 
    return (
 
@@ -19,48 +98,40 @@ function MarkdownRenderer({ content }) {
 
             components={{
 
-               /* Code Highlighting */
-
-               code({ inline, className, children }) {
+               code({ inline, className, children, node }) {
 
                   const match = /language-(\w+)/.exec(className || "");
+                  const codeString = String(children).replace(/\n$/, "");
 
-                  return !inline && match ? (
+                  if (!inline && match) {
 
-                     <div className="overflow-x-auto">
+                     const id = node.position.start.line;
+                     const currentCode = editedCodes[id] || codeString;
 
-                        <SyntaxHighlighter
-                           style={oneLight}
+                     return (
+                        <CodeBlock
+                           key={id}
+                           id={id}
                            language={match[1]}
-                           PreTag="div"
-                           customStyle={{
-                              background: "#ffffff",
-                              borderRadius: "10px",
-                              padding: "16px",
-                              marginTop: "20px",
-                              marginBottom: "20px",
-                              fontSize: "14px"
-                           }}
-                        >
+                           code={currentCode}
+                           copiedCode={copiedCode}
+                           outputs={outputs}
+                           hiddenOutputs={hiddenOutputs}
+                           hideOutput={handleHideOutput}
+                           onCopy={handleCopy}
+                           onRun={runCode}
+                        />
+                     );
 
-                           {String(children).replace(/\n$/, "")}
+                  }
 
-                        </SyntaxHighlighter>
-
-                     </div>
-
-                  ) : (
-
+                  return (
                      <code className="bg-gray-100 px-1 py-0.5 rounded text-sm break-words">
                         {children}
                      </code>
-
                   );
 
                },
-
-
-               /* Image Slider */
 
                slider({ children }) {
 
@@ -73,9 +144,6 @@ function MarkdownRenderer({ content }) {
                   return <ImageSlider images={images} />;
 
                },
-
-
-               /* Images Responsive */
 
                img({ src, alt }) {
 
@@ -92,18 +160,19 @@ function MarkdownRenderer({ content }) {
             }}
 
          >
-
             {content}
-
          </ReactMarkdown>
 
       </div>
 
-   )
+   );
 
 }
 
 export default MarkdownRenderer;
+
+
+ 
 
 
 
