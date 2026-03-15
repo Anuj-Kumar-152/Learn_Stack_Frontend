@@ -46,7 +46,7 @@ function MarkdownRenderer({ content }) {
 
       try {
 
-         const res = await fetch("VITE_BACKEND_URL/api/run", {
+         const res = await fetch("import.meta.env.VITE_BACKEND_URL/api/run", {
             method: "POST",
             headers: {
                "Content-Type": "application/json"
