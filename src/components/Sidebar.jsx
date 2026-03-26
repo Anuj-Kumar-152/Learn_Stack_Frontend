@@ -55,18 +55,10 @@ function Sidebar({ closeSidebar }) {
 
    return (
 
-      <div className="w-64 lg:w-72 flex-shrink-0">
+      <div className="w-64 mt-16 lg:w-72 flex-shrink-0">
 
          {/* Logo (desktop only) */}
-         <div className="hidden lg:flex h-32 sm:h-36 m-3 sm:m-5 rounded-xl items-center justify-center bg-amber-200 border-b">
-
-            <img
-               src="/image.png"
-               alt="logo"
-               className="h-24 sm:h-28 lg:h-32 w-auto rounded-xl"
-            />
-
-         </div>
+          
 
          {/* Sidebar Content */}
 

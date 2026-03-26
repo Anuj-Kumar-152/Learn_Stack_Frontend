@@ -13,8 +13,7 @@ function JavaPage() {
 
       <div className="min-h-screen bg-white">
 
-         {/* Navbar */}
-         <Navbar />
+         
 
          {/* Mobile Sidebar Button */}
          <div className="lg:hidden fixed top-16 left-0 right-0 bg-white border-b z-40 px-4 py-2 flex justify-between items-center">
