@@ -104,6 +104,28 @@ function Home() {
 
             </div>
 
+
+            {/* 🚀 NEW CODING SECTION (ADD ONLY) */}
+
+            <div className="mt-20 text-center">
+
+               <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+                  Practice Coding 💻
+               </h2>
+
+               <p className="text-gray-600 mb-6">
+                  Solve real coding problems like LeetCode & GFG
+               </p>
+
+               <button
+                  onClick={() => navigate("/problems")}
+                  className="bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
+               >
+                  Start Solving Problems
+               </button>
+
+            </div>
+
          </div>
 
       </div>
@@ -112,13 +134,3 @@ function Home() {
 }
 
 export default Home;
-
-
-
-
-
-
-
-
-
- 
