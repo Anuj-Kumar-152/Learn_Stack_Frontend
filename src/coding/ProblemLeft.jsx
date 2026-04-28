@@ -1,3 +1,5 @@
+import SubmissionList from "./SubmissionList";
+
 function ProblemLeft({
    problem,
    leftView,
@@ -16,6 +18,29 @@ function ProblemLeft({
 }) {
    return (
       <div className="w-1/2 border-r bg-white relative">
+
+         {/* 🔥 ONLY ADDITION (TOP BUTTONS) */}
+         <div className="flex gap-2 p-2 border-b bg-gray-50">
+            <button
+               onClick={() => setLeftView("problem")}
+               className={`px-3 py-1 text-sm rounded ${leftView === "problem"
+                     ? "bg-indigo-600 text-white"
+                     : "bg-gray-200"
+                  }`}
+            >
+               Problem
+            </button>
+
+            <button
+               onClick={() => setLeftView("submissions")}
+               className={`px-3 py-1 text-sm rounded ${leftView === "submissions"
+                     ? "bg-indigo-600 text-white"
+                     : "bg-gray-200"
+                  }`}
+            >
+               Submissions
+            </button>
+         </div>
 
          {/* LOADING OVERLAY */}
          {running && (
@@ -40,10 +65,10 @@ function ProblemLeft({
 
                   <span
                      className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${problem.difficulty === "Easy"
-                        ? "bg-green-100 text-green-700"
-                        : problem.difficulty === "Medium"
-                           ? "bg-yellow-100 text-yellow-700"
-                           : "bg-red-100 text-red-700"
+                           ? "bg-green-100 text-green-700"
+                           : problem.difficulty === "Medium"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-red-100 text-red-700"
                         }`}
                   >
                      {problem.difficulty}
@@ -93,6 +118,13 @@ function ProblemLeft({
             </div>
          )}
 
+         {/* 🔥 ONLY ADDITION (SUBMISSIONS VIEW - CORRECT POSITION) */}
+         {leftView === "submissions" && (
+            <div className="h-full overflow-y-auto">
+               <SubmissionList slug={problem.slug} />
+            </div>
+         )}
+
          {/* ================= RUN VIEW ================= */}
          {leftView === "run" && (
             <div className="h-full flex flex-col">
@@ -134,7 +166,8 @@ function ProblemLeft({
                               return (
                                  <div
                                     key={i}
-                                    className={`${isFail ? "text-red-400 font-semibold" : "text-green-400"} ${!isStopped ? "animate-pulse" : ""}`}
+                                    className={`${isFail ? "text-red-400 font-semibold" : "text-green-400"} ${!isStopped ? "animate-pulse" : ""
+                                       }`}
                                  >
                                     {log}
                                  </div>
@@ -187,8 +220,8 @@ function ProblemLeft({
                            {runResult && (
                               <span
                                  className={`px-3 py-1 rounded text-xs font-semibold ${runResult.output === runResult.expected
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-red-100 text-red-700"
+                                       ? "bg-green-100 text-green-700"
+                                       : "bg-red-100 text-red-700"
                                     }`}
                               >
                                  {runResult.output === runResult.expected
@@ -222,8 +255,8 @@ function ProblemLeft({
                            </div>
                            <div
                               className={`p-4 font-mono text-sm min-h-[80px] ${runResult?.output === runResult?.expected
-                                 ? "bg-green-100 text-green-700"
-                                 : "bg-red-100 text-red-700"
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-red-100 text-red-700"
                                  }`}
                            >
                               {runResult?.expected}
@@ -240,4 +273,9 @@ function ProblemLeft({
    );
 }
 
-export default ProblemLeft;
+export default ProblemLeft; 
+
+
+
+ 
+

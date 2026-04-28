@@ -17,6 +17,18 @@ const handleSubmitCode = async ({
    let eventSource = null;
 
    try {
+      console.log("🚀 SUBMIT START");
+
+      const user = JSON.parse(localStorage.getItem("user"));
+      console.log("👤 USER:", user);
+
+      if (!user?._id) {
+         console.log("❌ USER ID NOT FOUND");
+         return;
+      }
+
+      console.log("📤 Sending userId:", user._id);
+
       setSubmitting(true);
       setLeftView("run");
 
@@ -35,7 +47,10 @@ const handleSubmitCode = async ({
 
       const encodedCode = encodeURIComponent(code.trim());
 
-      const url = `${import.meta.env.VITE_BACKEND_URL}/api/submit?code=${encodedCode}&slug=${slug}`;
+      // 🔥 ONLY CHANGE: userId added
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/submit?code=${encodedCode}&slug=${slug}&userId=${user._id}`;
+
+      console.log("🌐 API URL:", url);
 
       eventSource = new EventSource(url);
 
@@ -93,17 +108,18 @@ const handleSubmitCode = async ({
             }
 
          } catch (e) {
-            console.log(e);
+            console.log("❌ PARSE ERROR:", e);
          }
       };
 
       eventSource.onerror = () => {
+         console.log("❌ SSE ERROR");
          if (eventSource) eventSource.close();
          setSubmitStatus("done");
       };
 
    } catch (err) {
-      console.log(err);
+      console.log("🔥 SUBMIT ERROR:", err);
       setSubmitStatus("done");
    } finally {
       setSubmitting(false);
@@ -130,9 +146,8 @@ export { handleSubmitCode };
 //    setFailedCase,
 //    setProgress,
 //    setProgressTotal,
-
-//    // 🔥 NEW
-//    setLiveLogs
+//    setLiveLogs,
+//    setIsStopped
 // }) => {
 
 //    let eventSource = null;
@@ -146,8 +161,8 @@ export { handleSubmitCode };
 //       setSubmitResult(null);
 //       setFailedCase(null);
 
-//       // 🔥 RESET LOGS
 //       setLiveLogs([]);
+//       setIsStopped(false);
 
 //       const totalTC = problem.testCases?.length || 0;
 
@@ -158,8 +173,6 @@ export { handleSubmitCode };
 
 //       const url = `${import.meta.env.VITE_BACKEND_URL}/api/submit?code=${encodedCode}&slug=${slug}`;
 
-//       console.log("🚀 SSE URL:", url);
-
 //       eventSource = new EventSource(url);
 
 //       let lastProgress = 0;
@@ -168,36 +181,27 @@ export { handleSubmitCode };
 //          try {
 //             const data = JSON.parse(event.data);
 
-//             console.log("📡 SSE DATA:", data);
-
-//             // ================= 🔥 LIVE LOG =================
 //             if (data.type === "progress") {
-
-//                // 👉 UI STREAM (GFG STYLE)
 //                const logLine = `✔ Passed: ${data.passed}/${data.total ?? totalTC}`;
-
 //                setLiveLogs(prev => [...prev, logLine]);
 
-//                // ================= PROGRESS =================
 //                if (data.passed > lastProgress) {
 //                   lastProgress = data.passed;
-
 //                   setProgress(data.passed);
 //                   setProgressTotal(data.total ?? totalTC);
 //                }
-
 //                return;
 //             }
 
-//             // ================= WRONG ANSWER =================
 //             if (data.status === "Wrong Answer ❌") {
+//                setIsStopped(true);
 
 //                setLiveLogs(prev => [
 //                   ...prev,
 //                   `❌ Failed at Test Case ${data.failedCase?.index}`
 //                ]);
 
-//                setFailedCase(data.failedCase || null);
+//                setFailedCase(data.failedCase);
 //                setSubmitResult(data);
 //                setSubmitStatus("done");
 
@@ -207,34 +211,8 @@ export { handleSubmitCode };
 //                return;
 //             }
 
-//             // ================= RUNTIME ERROR =================
-//             if (data.status === "Runtime Error ❌") {
-
-//                setLiveLogs(prev => [...prev, "💥 Runtime Error"]);
-
-//                setSubmitResult(data);
-//                setSubmitStatus("done");
-
-//                setProgress(data.passed || lastProgress);
-
-//                eventSource.close();
-//                return;
-//             }
-
-//             // ================= COMPILATION ERROR =================
-//             if (data.status === "Compilation Error ❌") {
-
-//                setLiveLogs(prev => [...prev, "⚠ Compilation Error"]);
-
-//                setSubmitResult(data);
-//                setSubmitStatus("done");
-
-//                eventSource.close();
-//                return;
-//             }
-
-//             // ================= ACCEPTED =================
 //             if (data.status === "Accepted ✔") {
+//                setIsStopped(true);
 
 //                setLiveLogs(prev => [
 //                   ...prev,
@@ -244,27 +222,24 @@ export { handleSubmitCode };
 //                setSubmitResult(data);
 //                setSubmitStatus("done");
 
-//                setProgress(data.passed ?? lastProgress);
+//                setProgress(data.passed);
 
 //                eventSource.close();
 //                return;
 //             }
 
 //          } catch (e) {
-//             console.log("❌ JSON parse error:", e);
+//             console.log(e);
 //          }
 //       };
 
-//       eventSource.onerror = (err) => {
-//          console.log("🔥 SSE Error:", err);
-
+//       eventSource.onerror = () => {
 //          if (eventSource) eventSource.close();
-
 //          setSubmitStatus("done");
 //       };
 
 //    } catch (err) {
-//       console.log("🔥 Error:", err);
+//       console.log(err);
 //       setSubmitStatus("done");
 //    } finally {
 //       setSubmitting(false);
@@ -273,11 +248,6 @@ export { handleSubmitCode };
 
 // export { handleSubmitCode };
 
-
-
-
-
- 
 
 
  

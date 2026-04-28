@@ -117,8 +117,23 @@ function Navbar() {
          <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-3 sm:px-6">
 
             {/* LOGO */}
-            <div onClick={() => navigate("/")} className="flex items-center cursor-pointer">
-               <img src="/images/logo.png" alt="logo" className="h-10 sm:h-12 md:h-14 object-contain" />
+            {/* <div onClick={() => navigate("/")} className="flex items-center cursor-pointer"> 
+               <img src="/images/logo.png" alt="logo" className="h-4 sm:h-12 md:h-14 object-contain" />
+               LearnStack
+            </div> */}
+            <div
+               onClick={() => navigate("/")}
+               className="flex items-center cursor-pointer"
+            >
+               <img
+                  src="/images/logo.png"
+                  alt="logo"
+                  className="h-5 sm:h-10 md:h-12 object-contain"
+               />
+
+               <span className="text-sm text-blue-500 sm:text-xl md:text-2xl font-semibold leading-none">
+                  LearnStack
+               </span>
             </div>
 
             {/* SEARCH (desktop) */}

@@ -1,21 +1,17 @@
 import { useEffect, useState } from "react"; 
 import MarkdownRenderer from "./MarkdownRenderer";
-import ReadingProgress from "./ReadingProgress";
-import CompletionMessage from "./CompletionMessage";
+ 
 import Loader from "./Loader";
 
 function Content({ slug }) {
 
    const [topic, setTopic] = useState(null);
-   const [progress, setProgress] = useState(0);
-   const [completed, setCompleted] = useState(false);
-
+   
    useEffect(() => {
 
       if (!slug) return;
 
-      setCompleted(false);
-      setProgress(0);
+       
       setTopic(null);
 
        
@@ -28,8 +24,8 @@ function Content({ slug }) {
      fetch(`${import.meta.env.VITE_BACKEND_URL}/api/topics/${slug}`)
    .then(res => res.json())
    .then(data => {
-      setCompleted(false);
-      setProgress(0);
+      
+       
       setTopic(data);
    });
 
@@ -83,7 +79,7 @@ function Content({ slug }) {
        
       <div key={slug} className=" sm:px-6 lg:px-4 py-8 sm:py-10"> 
           
-         <div key={topic._id} className="sticky max-w-3xl top-0 z-5 bg-white shadow-sm">
+         <div key={topic._id} className="sticky rounded-md max-w-3xl top-0 z-5 bg-gray-100 shadow-sm">
 
             <div className="sm:px-2 py-3 ml-3">
 
@@ -91,13 +87,7 @@ function Content({ slug }) {
                   {topic.title}
                </h1>
 
-               <ReadingProgress progress={progress} />
-
-               {completed && (
-                  <CompletionMessage title={topic.title} />
-               )}
                 
-
             </div>
 
          </div>
