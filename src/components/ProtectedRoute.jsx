@@ -1,45 +1,28 @@
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import { Navigate } from "react-router-dom";
+import React from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import useAuthStore from '../store/useAuthStore';
 
-function ProtectedRoute({ children }) {
+const ProtectedRoute = ({ allowedRoles }) => {
+    const { isAuthenticated, isLoading, user } = useAuthStore();
+    const location = useLocation();
 
-   const { user, loading } = useContext(AuthContext);
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-900">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-500"></div>
+            </div>
+        );
+    }
 
-   // 🔥 ADD THIS (IMPORTANT)
-   if (loading) {
-      return (
-         <div className="flex justify-center items-center h-screen">
-            <p className="text-gray-500">Loading...</p>
-         </div>
-      );
-   }
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    }
 
-   // 🔥 SAME LOGIC
-   if (!user) return <Navigate to="/login" />;
+    if (allowedRoles && (!user || !allowedRoles.includes(user.role))) {
+        return <Navigate to="/" replace />; // Or a "Not Authorized" page
+    }
 
-   return children;
-}
+    return <Outlet />;
+};
 
 export default ProtectedRoute;
-
-
-
-
-
-
-
-
-// import { useContext } from "react";
-// import { AuthContext } from "../context/AuthContext";
-// import { Navigate } from "react-router-dom";
-
-// function ProtectedRoute({ children }) {
-//    const { user } = useContext(AuthContext);
-
-//    if (!user) return <Navigate to="/login" />;
-
-//    return children;
-// }
-
-// export default ProtectedRoute;
